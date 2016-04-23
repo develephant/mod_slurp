@@ -22,14 +22,17 @@ function SlurpQueue:initialize( init_tbl )
 end
 
 function SlurpQueue:run()
+  --Sanity check
+  if self.breather_id then
+    timer.cancel( self.breather_id )
+  end
   if self.timer_id then
     timer.cancel( self.timer_id )
   end
-
   if self.network_id then
     network.cancel( self.network_id )
   end
-
+  -- Process
   if self:count() > 0 then
     self:_debug("Running Queue")
     self:list()
