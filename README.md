@@ -43,7 +43,7 @@ There are a couple of options you can specify via a table when you create a Slur
 |Key|Description|Default|
 |----|-----------|-------|
 |`timeout`|The amount of time (in milliseconds) before giving up on a connection|5000|
-|`fetch_one`|After the first successful data, Slurp exits. You can have Slurp run through the whole list by setting this key to `false`|true
+|`method`|The method you use for the URL call|'GET'
 
 #### Example
 
@@ -182,7 +182,7 @@ s:run()
 
 ### Summary Notes
 
-Once you put together the URL queue, as in the example above, and set up the "callbacks", we run the queue. By default, once the first successful result is found, Slurp stops processing that instance (unless you set it otherwise).
+Once you put together the URL queue, as in the example above, and set up the "callbacks", we run the queue. By default, once the first successful result is found, Slurp stops processing that instance.
 
 By incorporating `URLObjects` in the queue, you can specialize certain endpoint results. For instance, in the example above, we have a custom object for Google. When Google returns its results, the `googleCallback` will be triggered. Any other URL (in the example list above) would trigger the default `networkCallback`.
 

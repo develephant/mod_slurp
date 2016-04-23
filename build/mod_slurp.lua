@@ -1,148 +1,138 @@
 --==============================================================--
---== mod_slurp - url checker. downloader
---== (c)2016 Chris Byerley - chris@coronalabs.com
---== Version 0.0.1
+--== Slurp Module for Corona SDK
+--== (c)2016 Chris Byerley chris@coronalabs.com
 --==============================================================--
-
-local timer = require('timer')
 local network = require('network')
+local timer = require('timer')
 
---==============================================================--
---== Preflight
---==============================================================--
-local Slurp =
-{
-  callback = nil,
-  fetch_one = true,
-  network_id = 0,
-  options = {},
-  timeout = 5000,
-  timer_id = 0,
-  url_q = {}
-}
+local Slurp = {}
 
---==============================================================--
---== Publics
---==============================================================--
-function Slurp:new( url_q, callback, options_tbl )
-  --validate url queue
-  self.url_q = url_q or {}
-  --validate callback
-  self.callback = callback or nil
-  --validate options tbl
-  local options_tbl = options_tbl or {}
+function Slurp.new( urls, callback, options )
+  local urls = urls or nil
+  local callback = callback or nil
+  local options = options or {}
 
-  --fetch options
-  if options_tbl.fetch_one then
-    self.fetch_one = options_tbl.fetch_one
-  end
-  --timeout options
-  if options_tbl.timeout then
-    self.timeout = options_tbl.timeout
-  end
-  return self
-end
+  --==============================================================--
+  --== Slurp Instance Factory
+  --==============================================================--
+  local s =
+  {
+    callback = callback,
+    method = "GET",
+    network_id = nil,
+    options = options,
+    timer_id = nil,
+    timeout = 5000,
+    url_q = urls
+  }
 
-function Slurp:run()
-  self:_runner()
-end
-
-function Slurp:stop()
-  self:_timeout_stop()
-  self:_network_cancel(self.network_id)
-  self:_done()
-end
-
---==============================================================--
---== Privates
---==============================================================--
-function Slurp:_runner()
-  --get req url, if any
-  if not self:_is_list_empty() then
-    local url = self:_parse_url_entry( self:_get_next_url() )
-    self:_timeout_start()
-    self:_network_request( url )
-  else --all done
-    self:stop()
-  end
-end
-
-function Slurp:_parse_url_entry( url_obj )
-  --validate
-  local url_obj = url_obj or ""
-  --check for url object
-  if type( url_obj ) == 'table' then
-    --validate
-    local url = url_obj.url or nil
-    --check for custom options
-    if url_obj.options then
-      self.options = url_obj.options
+  function s:add( url )
+    if url then
+      table.insert( self.url_q, url )
     end
-    --check for custom callback
-    if url_obj.callback then
-      self.callback = url_obj.callback
-    end
-
-    return url
   end
-  --just a string
-  return tostring( url_obj )
-end
 
-function Slurp:_is_list_empty()
-  if #self.url_q > 0 then
-    return false
-  end
-  return true
-end
-
-function Slurp:_get_next_url()
-  if not self:_is_list_empty() then
-    return table.remove( self.url_q, 1 )
-  end
-  return nil
-end
-
-function Slurp:_timeout_start()
-  local function onTimeout()
-    self:_timeout_done()
-  end
-  self.timer_id = timer.performWithDelay( self.timeout, onTimeout )
-end
-
-function Slurp:_timeout_stop()
-  timer.cancel( self.timer_id )
-end
-
-function Slurp:_timeout_done()
-  self:_network_cancel()
-  self:request()
-end
-
-function Slurp:_network_request( url )
-  local function onRequest( evt )
-    if evt.isError then
-      --unrecoverable error, skip to next
-      self:request()
-    else --a catch!
-      self.callback( evt )
-      if self.fetch_one then
-        self:stop()
-      else
-        --keep slurping
-        self:request()
+  function s:run()
+    --Check queue count
+    local url_cnt = self:count()
+    if url_cnt > 0 then
+      --Get URL or URLObject
+      local url = table.remove( self.url_q, 1 )
+      --Defaults
+      local callback = self.callback
+      local options = self.options
+      local timeout = self.timeout
+      local method = self.method
+      --check for URLObject
+      if type( url ) == 'table' then
+        --parse table
+        callback = url.callback or self.callback or nil
+        options = url.options or self.options or {}
+        timeout = url.timeout or self.timeout or 5000
+        method = url.method or self.method or "GET"
+        url = url.url or url or nil
       end
+
+      --Set up network listener
+      local networkListener
+      networkListener = function( evt )
+        if evt.isError then
+          self:stop()
+          self:run()
+        else
+          print( evt.phase )
+          if evt.phase == 'ended' then
+            self:stop()
+            --Send to callback with network event
+            self.callback( evt )
+          end
+        end
+      end
+
+      --Make network request
+      self:_start()
+      self.network_id = network.request( url, self.method, networkListener, options )
     end
   end
-  self.network_id = network.request( url, onRequest, self.options )
+
+  function s:stop()
+
+    if self.timer_id then
+      timer.cancel( self.timer_id )
+      self.timer_id = nil
+    end
+
+    if self.network_id then
+      network.cancel( self.network_id )
+      self.network_id = nil
+    end
+
+    s:_done()
+  end
+
+  function s:count()
+    return #self.url_q
+  end
+
+  function s:flush()
+    s:stop()
+    self.url_q = {}
+    self.callback = nil
+    self.method = 'GET'
+  end
+
+  --==============================================================--
+  --== Privates
+  --==============================================================--
+  function s:_start()
+    local onTimeout = function()
+      self:_timedout()
+    end
+    self.timer_id = timer.performWithDelay( self.timeout, onTimeout )
+  end
+
+  function s:_timedout()
+    --check for more
+    if s:count() > 0 then
+      s:run()
+    else
+      s:stop()
+    end
+  end
+
+  function s:_done()
+    print( 'Done' )
+  end
+
+  return s
 end
 
-function Slurp:_network_cancel()
-  network.cancel( self.network_id )
+--==============================================================--
+--== URLObject Factory
+--==============================================================--
+function Slurp.newURLObject( url, callback, options )
+  return { url = url, callback = callback, options = options }
 end
 
-function Slurp:_done()
-  print('Done')
-end
 
 return Slurp
