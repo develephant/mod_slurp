@@ -1,3 +1,6 @@
+--==============================================================--
+--== Slurp test
+--==============================================================--
 local Slurp = require('mod_slurp')
 
 local urls = { 'http://www.gel23oes.com', 'https://www.google.com' }
@@ -9,4 +12,4 @@ local function networkCallback( evt )
 end
 
 local s = Slurp:new( urls, networkCallback )
-s:request()
+s:run()
