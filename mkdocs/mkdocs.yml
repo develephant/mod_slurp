@@ -1,8 +1,0 @@
-site_name: 'Slurp Module'
-site_description: 'A Corona SDK Module to check network sites for content'
-site_url: 'https://www.coronalabs.com'
-site_author: 'develephant'
-copyright: '&copy;2016 Chris Byerley'
-theme: 'amelia'
-pages:
-  - 'Documentation': 'index.md'
