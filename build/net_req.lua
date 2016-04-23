@@ -1,6 +1,6 @@
 local mod = {}
 
-function mod.new( url, method, callback, options )
+function mod.new( url, callback, options )
 
   local s =
   {
@@ -13,7 +13,7 @@ function mod.new( url, method, callback, options )
 
   function s:run()
     print('run')
-    self.network_id = network.request( self.url, self.method, self.callback, self.options )
+    self.network_id = network.request( self.url, self.callback, self.options )
   end
 
   function s:stop()
