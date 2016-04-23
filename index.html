@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <meta name="author" content="Chris Byerley">
+        
+        <link rel="shortcut icon" href="./img/favicon.ico">
+
+	<title>Slurp!</title>
+
+        <link href="./css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="./css/font-awesome-4.0.3.css" rel="stylesheet">
+        <link rel="stylesheet" href="./css/highlight.css">
+        <link href="./css/base.css" rel="stylesheet">
+
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
+
+        
+    </head>
+
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+
+        <!-- Collapsed navigation -->
+        <div class="navbar-header">
+            <!-- Expander button -->
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+
+            <!-- Main title -->
+            <a class="navbar-brand" href=".">Slurp!</a>
+        </div>
+
+        <!-- Expanded navigation -->
+        <div class="navbar-collapse collapse">
+            <!-- Main navigation -->
+            <ul class="nav navbar-nav">
+            
+            
+                <li class="active">
+                    <a href=".">Documentation</a>
+                </li>
+            
+            
+            </ul>
+
+            <!-- Search, Navigation and Repo links -->
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                        <i class="fa fa-search"></i> Search
+                    </a>
+                </li>
+                <li class="disabled">
+                    <a rel="next" >
+                        <i class="fa fa-arrow-left"></i> Previous
+                    </a>
+                </li>
+                <li class="disabled">
+                    <a rel="prev" >
+                        Next <i class="fa fa-arrow-right"></i>
+                    </a>
+                </li>
+                
+                <li>
+                    <a href="https://github.com/develephant/mod_slurp">
+                        
+                            <i class="fa fa-github"></i>
+                        
+                        GitHub
+                    </a>
+                </li>
+                
+            </ul>
+        </div>
+    </div>
+</div>
+
+        <div class="container">
+            <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+    
+        <li class="main active"><a href="#mod_slurplua">mod_slurp.lua</a></li>
+        
+            <li><a href="#preflight">Preflight</a></li>
+        
+            <li><a href="#download-slurp">Download Slurp!</a></li>
+        
+            <li><a href="#usage">Usage</a></li>
+        
+            <li><a href="#slurpnew-init_tbl">Slurp:new( init_tbl )</a></li>
+        
+            <li><a href="#slurpadd-url">slurp:add( url )</a></li>
+        
+            <li><a href="#slurprun">slurp:run()</a></li>
+        
+            <li><a href="#slurpstop">slurp:stop()</a></li>
+        
+            <li><a href="#slurpcount">slurp:count()</a></li>
+        
+            <li><a href="#summary-notes">Summary Notes</a></li>
+        
+    
+    </ul>
+</div></div>
+            <div class="col-md-9" role="main">
+
+<h1 id="mod_slurplua">mod_slurp.lua</h1>
+<p>The Slurp Module for <a href="https://www.coronalabs.com">Corona SDK</a> allows you to walk a list of URLs and get the first one with content. Skipping unresponsive endpoints, or network related site errors.</p>
+<h3 id="preflight">Preflight</h3>
+<blockquote>
+<h3 id="download-slurp"><a href="https://github.com/develephant/mod_slurp/archive/master.zip">Download Slurp!</a></h3>
+</blockquote>
+<p>Add the Slurp Module <code>mod_slurp.lua</code> to your <strong>Corona SDK</strong> project.</p>
+<pre><code class="lua">local Slurp = require('mod_slurp')
+</code></pre>
+
+<h2 id="usage">Usage</h2>
+<p>Using Slurp is pretty simple; you provide the module with a list of URLs and it will go through each one until it receives valid data. This can be useful for checking busy or unresponsive network endpoints.</p>
+<p><strong>There are only a handful of Slurp API methods:</strong></p>
+<hr />
+<h2 id="slurpnew-init_tbl"><code>Slurp:new( init_tbl )</code></h2>
+<p>Create a new Slurp instance.</p>
+<h4 id="returns">Returns</h4>
+<p>A new Slurp instance.</p>
+<h4 id="init-table">Init Table</h4>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Description</th>
+<th>Default</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>urls</code></td>
+<td>A table array of URL strings. You can also use the <code>:add()</code> method (see below)</td>
+<td>nil</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>callback</code></td>
+<td>The default method that will be called on network events</td>
+<td>nil</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>timeout</code></td>
+<td>Amount of time in milliseconds before moving to the next URL</td>
+<td>5000</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>breather</code></td>
+<td>Amount of time in milliseconds between network requests</td>
+<td>555</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>options</code></td>
+<td>A table of options that mimics the network.request options</td>
+<td>nil</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>debug</code></td>
+<td>Show process debugging output in the console</td>
+<td>false</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<h4 id="example">Example</h4>
+<pre><code class="lua">--Require mod_slurp
+local Slurp = require('mod_slurp')
+
+--Crate the URL table array
+local urls = { &quot;http://www.e4rrBorked.com&quot;, &quot;https://www.google.com&quot; }
+
+--Create a networkCallback
+local function networkCallback( evt )
+  print( evt.response )
+end
+
+--Create a new Slurp instance
+local s = Slurp:new({
+  urls = urls,
+  timeout = 10000,
+  debug = true,
+  callback = networkCallback,
+  options =
+  {
+    headers =
+    {
+      [&quot;X-Corona-App-ID&quot;] = '1234abcd'
+    }
+  }
+})
+</code></pre>
+
+<hr />
+<h2 id="slurpadd-url"><code>slurp:add( url )</code></h2>
+<p>Adds a URL to the Slurp queue.</p>
+<h4 id="parameters">Parameters</h4>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>url</code></td>
+<td>A URL string to add to the process queue</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<h4 id="returns_1">Returns</h4>
+<p><strong>Nothing</strong></p>
+<h4 id="example_1">Example</h4>
+<pre><code class="lua">...
+
+local s = Slurp:new( ... )
+
+--Adding URLs to the Queue
+s:add(&quot;https://coronalabs.com&quot;)
+s:add(&quot;https://www.google.com&quot;)
+</code></pre>
+
+<hr />
+<h2 id="slurprun"><code>slurp:run()</code></h2>
+<p>Starts running the Slurp process, checking sites for connectivity and results. You can run this anytime after giving the queue at least one URL.</p>
+<h4 id="returns_2">Returns</h4>
+<p>Events through the <code>callback</code> method passed in when the instance was created (see <code>:new()</code> above).</p>
+<h4 id="parameters_1">Parameters</h4>
+<p><strong>None</strong></p>
+<h4 id="example_2">Example</h4>
+<pre><code class="lua">...
+
+--Create the instance
+local s = Slurp:new( ... )
+
+--Add some URLs
+s:add(&quot;https://coronalabs.com&quot;)
+s:add(&quot;https://www.google.com&quot;)
+
+--Run the instance
+s:run()
+
+</code></pre>
+
+<hr />
+<h2 id="slurpstop"><code>slurp:stop()</code></h2>
+<p>While Slurp generally handles its own life-cycle, in situations where you need a full-stop, you can use this method.</p>
+<h4 id="returns_3">Returns</h4>
+<p><strong>Nothing</strong></p>
+<h4 id="parameters_2">Parameters</h4>
+<p><strong>None</strong></p>
+<h4 id="example_3">Example</h4>
+<pre><code class="lua">...
+
+--Halt the Slurp instance from anymore processing.
+s:stop()
+</code></pre>
+
+<hr />
+<h2 id="slurpcount"><code>slurp:count()</code></h2>
+<p>The current amount of entries left in the Slurp queue.</p>
+<h4 id="returns_4">Returns</h4>
+<p>A Number</p>
+<h4 id="parameters_3">Parameters</h4>
+<p><strong>None</strong></p>
+<h4 id="example_4">Example</h4>
+<pre><code class="lua">...
+
+--Get the current queue count
+local q_cnt = s:count()
+</code></pre>
+
+<hr />
+<h2 id="summary-notes">Summary Notes</h2>
+<p>Once you put together the URL queue, as in the example above, and set up the <code>callback</code>, we run the queue. By default, once the first successful result is found, Slurp stops processing that instance and triggers the supplied <code>callback</code>.</p>
+<p>Timeouts are not based on the normal network timeout, but an actual timer instance. This provides more flexibility in moving through your queue. For instance, instead of waiting N seconds for the network timeout, you can decide to move on to the next URL at any amount of time of your choosing. This can be adjusted when creating a new Slurp instance.</p>
+<p>If Slurp runs into network or http errors, it will skip to the next URL in the queue, if any. The <code>timeout</code> is disregarded in these cases, but the <code>breather</code> delay still takes place.</p>
+<p><strong><a href="https://forums.coronalabs.com">Visit the Corona Labs forums with any questions.</a></strong></p>
+<hr /></div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            
+                <center>&copy;2016 Chris Byerley</center>
+            
+            <center>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</center>
+        </footer>
+
+        <script src="./js/jquery-1.10.2.min.js"></script>
+        <script src="./js/bootstrap-3.0.3.min.js"></script>
+        <script src="./js/highlight.pack.js"></script>
+        <script>var base_url = '.';</script>
+        <script data-main="./mkdocs/js/search.js" src="./mkdocs/js/require.js"></script>
+        <script src="./js/base.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                        <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            From here you can search these documents. Enter
+                            your search terms below.
+                        </p>
+                        <form role="form">
+                            <div class="form-group">
+                                <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query">
+                            </div>
+                        </form>
+                        <div id="mkdocs-search-results"></div>
+                    </div>
+                    <div class="modal-footer">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
