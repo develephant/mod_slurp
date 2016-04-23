@@ -4,7 +4,7 @@ The Slurp Module for Corona SDK allows you to walk a list of urls and get the fi
 
 ### Preflight
 
-Download the latest module by __[Clicking Here](#)__
+Download the latest module by __[Clicking Here](https://github.com/develephant/mod_slurp/archive/master.zip)__
 
 Add the Slurp Module `mod_slurp.lua` to your __Corona SDK__ project.
 
