@@ -1,16 +1,19 @@
 --==============================================================--
---== SlurpQueue Class
+--== Slurp Module
+--== (c)2016 C. Byerley - chris@coronalabs.com
 --==============================================================--
 local Prototype = require( "CoronaPrototype" )
 
 local SlurpQueue = Prototype:newClass("SlurpQueue")
 function SlurpQueue:initialize( init_tbl )
   print('Slurp!')
+
   self.callback = init_tbl.callback or nil
   self.debug = init_tbl.debug or false
   self.options = init_tbl.options or nil
   self.timeout = init_tbl.timeout or 5000
   self.breather = init_tbl.breather or 555
+
   self.timer_id = nil
   self.network_id = nil
   self.processing_url = nil
