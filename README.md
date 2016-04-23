@@ -1,6 +1,6 @@
 # mod_slurp.lua
 
-The Slurp Module for Corona SDK allows you to walk a list of urls and get the first one with content. Skipping unresponsive endpoints, or network related site errors.
+The Slurp Module for [Corona SDK](https://www.coronalabs.com) allows you to walk a list of URLs and get the first one with content. Skipping unresponsive endpoints, or network related site errors.
 
 ### Preflight
 
