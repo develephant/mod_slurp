@@ -1,27 +1,29 @@
-local network = require('network')
+--==============================================================--
+--== Slurp Demo/Test
+--==============================================================--
+local Slurp = require('mod_slurp')
 
-local NetworkRequest = require('net_req')
-
-local url = "http://www.err4Borked.com"
-local method = "GET"
-local networkListener = function( evt )
-  print( evt.phase )
-  if evt.phase == 'ended' then
-    if evt.response then
-      print('roko')
-      --print( evt.response )
-    end
-  end
+local callback = function( evt )
+  print( evt.status, evt.phase )
 end
 
-local options = { path = "/?q=dog" }
--- --
--- -- local network_id = network.request( url, method, networkListener, options )
---
---
-local req = NetworkRequest.new( url, networkListener, options )
-req:run()
---
--- timer.performWithDelay( 2000, function() req:stop(); end )
+local s = Slurp:new({
+  callback = callback,
+  debug = true,
+  timeout = 5000,
+  breather = 555,
+  options =
+  {
+    headers =
+    {
+      ["X-My-Corona-ID"] = 'app-1234'
+    }
+  }
+})
 
--- local id = network.request( url, networkListener, options )
+s:add('woopy') --< ?
+s:add('ws://socket.io') --< Invalid protocol
+s:add('https://www.google.com') --< This should be the only url that triggers
+s:add('https://www.yahoo.com') --< Unless Google fails, this won't trigger
+
+s:run()
