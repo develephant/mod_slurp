@@ -15,6 +15,7 @@ function SlurpQueue:initialize( init_tbl )
   self.breather = init_tbl.breather or 555
 
   self.timer_id = nil
+  self.breather_id = nil
   self.network_id = nil
   self.processing_url = nil
   self.queue = init_tbl.urls or {}
@@ -65,7 +66,7 @@ end
 function SlurpQueue:doNext( evt )
   --tiny breath
   self:_debug("Skipping " .. self.processing_url .. " [" .. evt.status .. "]")
-  timer.performWithDelay( self.breather, function() self:run(); end )
+  self.breather_id = timer.performWithDelay( self.breather, function() self:run(); end )
 end
 
 function SlurpQueue:add( url )
@@ -98,6 +99,7 @@ function SlurpQueue:list()
 end
 
 function SlurpQueue:_done()
+  timer.cancel( self.breather_id )
   timer.cancel( self.timer_id )
   self:_debug("Done")
 end
