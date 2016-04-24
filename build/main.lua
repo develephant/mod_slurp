@@ -11,14 +11,7 @@ local s = Slurp:new({
   callback = callback,
   debug = true,
   timeout = 5000,
-  breather = 555,
-  options =
-  {
-    headers =
-    {
-      ["X-My-Corona-ID"] = 'app-1234'
-    }
-  }
+  breather = 555
 })
 
 s:add('woopy') --< ?

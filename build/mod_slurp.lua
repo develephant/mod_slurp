@@ -1,5 +1,5 @@
 --==============================================================--
---== Slurp Module
+--== Slurp Module 16.4.24.0
 --== (c)2016 C. Byerley - chris@coronalabs.com
 --==============================================================--
 local Prototype = require( "CoronaPrototype" )
@@ -10,7 +10,7 @@ function SlurpQueue:initialize( init_tbl )
 
   self.callback = init_tbl.callback or nil
   self.debug = init_tbl.debug or false
-  self.options = init_tbl.options or nil
+  self.options = init_tbl.options or {}
   self.timeout = init_tbl.timeout or 5000
   self.breather = init_tbl.breather or 555
 
@@ -23,15 +23,8 @@ end
 
 function SlurpQueue:run()
   --Sanity check
-  if self.breather_id then
-    timer.cancel( self.breather_id )
-  end
-  if self.timer_id then
-    timer.cancel( self.timer_id )
-  end
-  if self.network_id then
-    network.cancel( self.network_id )
-  end
+  self:_cancelAll()
+
   -- Process
   if self:count() > 0 then
     self:_debug("Running Queue")
@@ -53,7 +46,8 @@ function SlurpQueue:run()
     end
     self:_debug("Processing URL ".. self.processing_url)
     self.timer_id = timer.performWithDelay( self.timeout, function() self:doNext( {status = -99} ); end)
-    self.network_id = network.request( url, listener, self.options )
+
+    self.network_id = network.request( url, "GET", listener, self.options )
   else
     self:_done()
   end
@@ -101,9 +95,21 @@ function SlurpQueue:list()
   end
 end
 
+function SlurpQueue:_cancelAll()
+  --Sanity
+  if self.breather_id then
+    timer.cancel( self.breather_id )
+  end
+  if self.timer_id then
+    timer.cancel( self.timer_id )
+  end
+  if self.network_id then
+    network.cancel( self.network_id )
+  end
+end
+
 function SlurpQueue:_done()
-  timer.cancel( self.breather_id )
-  timer.cancel( self.timer_id )
+  self:_cancelAll()
   self:_debug("Done")
 end
 
