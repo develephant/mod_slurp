@@ -45,7 +45,7 @@ function SlurpQueue:run()
       end
     end
     self:_debug("Processing URL ".. self.processing_url)
-    self.timer_id = timer.performWithDelay( self.timeout, function() self:doNext( {status = -99} ); end)
+    self.timer_id = timer.performWithDelay( self.timeout, function() self:doNext( { status = -99 } ); end)
 
     self.network_id = network.request( url, "GET", listener, self.options )
   else
