@@ -94,6 +94,13 @@ function Slurp:cancel()
   self:_debug("Canceled!")
 end
 
+function Slurp:count()
+  if self.urls then
+    return #self.urls
+  end
+  return 0
+end
+
 function Slurp:_debug( entry )
   if self._debug_mode and entry then
     print(' ')
@@ -104,6 +111,8 @@ function Slurp:_debug( entry )
 end
 
 function Slurp:run()
+  self:_debug("Starting Slurp!")
+  self:_debug("Queue Count: " .. self:count())
   self:pump()
 end
 
