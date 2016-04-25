@@ -1,122 +1,110 @@
 --==============================================================--
---== Slurp Module 16.4.24.0
---== (c)2016 C. Byerley - chris@coronalabs.com
+--== Slurp Module for Corona SDK
+--== Version 16.4.25.0
+--== (c)2015 C. Byerley - chris@coronalabs.com
 --==============================================================--
-local Prototype = require( "CoronaPrototype" )
+local Prototype = require('CoronaPrototype')
+local network = require('network')
+local timer = require('timer')
 
-local SlurpQueue = Prototype:newClass("SlurpQueue")
-function SlurpQueue:initialize( init_tbl )
-  print('Slurp!')
-
-  self.callback = init_tbl.callback or nil
-  self.debug = init_tbl.debug or false
-  self.options = init_tbl.options or {}
+local Slurp = Prototype:newClass("Slurp")
+function Slurp:initialize( init_tbl )
+  self.urls = init_tbl.urls or {}
+  self.method = init_tbl.method or "GET"
   self.timeout = init_tbl.timeout or 5000
-  self.breather = init_tbl.breather or 555
+  self.options = init_tbl.options or nil
 
-  self.timer_id = nil
-  self.breather_id = nil
+  self._onSuccess = init_tbl.onSuccess or nil
+  self._onFailed = init_tbl.onFailed or nil
+  self._onDone = init_tbl.onDone or nil
+  self._onError = init_tbl.onError or nil
+
+  self._debug_mode = init_tbl.debug or false
+
+  self.timeout_id = nil
   self.network_id = nil
-  self.processing_url = nil
-  self.queue = init_tbl.urls or {}
 end
 
-function SlurpQueue:run()
-  --Sanity check
-  self:_cancelAll()
+function Slurp:timedout( url )
+  self:_debug("Timeout [" .. url .. "]")
+  network.cancel( self.network_id )
+  self:pump()
+end
 
-  -- Process
-  if self:count() > 0 then
-    self:_debug("Running Queue")
-    self:list()
-    local url = self:pop()
-    self.processing_url = url
-    local listener = function( evt )
-      if evt.status >= 0 then
-        if evt.status >= 200 and evt.status < 400 then
-          self:_debug(self.processing_url .. " Success! [" .. evt.status .. "]")
-          self.callback( evt )
-          self:_done()
-        else
-          self:doNext( evt )
+function Slurp:failed( url, status )
+  timer.cancel( self.timeout_id )
+  self:_debug("Failed ~> " .. url .. "[" .. status .. "]")
+  if self.onFailed then
+    self._onFailed( url, status )
+  end
+  self:pump()
+end
+
+function Slurp:callback( content, url, status )
+  if status and status >= 200 and status < 400 then
+    self:done()
+    if self._onSuccess then
+      self._onSuccess( content, url, status )
+    end
+  else
+    self:failed( url, status )
+  end
+end
+
+function Slurp:done()
+  timer.cancel( self.timeout_id )
+  if self._onDone then
+    self._onDone()
+  end
+  self:_debug("=> Done!")
+end
+
+function Slurp:pump()
+  local url = table.remove( self.urls, 1 )
+  if url then
+
+    self:_debug("Trying -> " .. url)
+    self.timeout_id = timer.performWithDelay( self.timeout, function() self:timedout( url ); end )
+
+    local listener, callback = nil
+    callback = function( ... ) self:callback( ... ); end
+    listener = function( evt )
+      timer.cancel( self.timeout_id )
+
+      if evt.isError then
+        if self._onError then
+          self._onError( url )
         end
+        self:_debug( "Network Error! ["..url.."]" )
+        self:pump()
       else
-        self:doNext( evt )
+        callback( evt.response, url, evt.status )
       end
     end
-    self:_debug("Processing URL ".. self.processing_url)
-    self.timer_id = timer.performWithDelay( self.timeout, function() self:doNext( { status = -99 } ); end)
+    self.network_id = network.request( url, self.method, listener, self.options )
 
-    self.network_id = network.request( url, "GET", listener, self.options )
   else
-    self:_done()
+    self:done()
   end
 end
 
-function SlurpQueue:stop()
-  if self.network_id then
-    network.cancel( self.network_id )
-    self:_done()
-  end
+function Slurp:cancel()
+  timer.cancel( self.timeout_id )
+  network.cancel( self.network_id )
+  self:_debug("Canceled!")
 end
 
-function SlurpQueue:doNext( evt )
-  --tiny breath
-  self:_debug("Skipping " .. self.processing_url .. " [" .. evt.status .. "]")
-  self.breather_id = timer.performWithDelay( self.breather, function() self:run(); end )
-end
-
-function SlurpQueue:add( url )
-  self:_debug("Added " .. url )
-  table.insert( self.queue, url )
-end
-
-function SlurpQueue:pop()
-  return table.remove( self.queue, 1 )
-end
-
-function SlurpQueue:get()
-  return self.queue
-end
-
-function SlurpQueue:count()
-  local scnt = tostring(#self.queue)
-  self:_debug("Queue Count: " .. scnt )
-  return #self.queue
-end
-
-function SlurpQueue:list()
-  if self.debug then
-    local n = 0
-    for _, url in pairs( self.queue ) do
-      n = n + 1
-      print( n .. '. ' .. url )
-    end
-  end
-end
-
-function SlurpQueue:_cancelAll()
-  --Sanity
-  if self.breather_id then
-    timer.cancel( self.breather_id )
-  end
-  if self.timer_id then
-    timer.cancel( self.timer_id )
-  end
-  if self.network_id then
-    network.cancel( self.network_id )
-  end
-end
-
-function SlurpQueue:_done()
-  self:_cancelAll()
-  self:_debug("Done")
-end
-
-function SlurpQueue:_debug( entry )
-  if self.debug and entry then
+function Slurp:_debug( entry )
+  if self._debug_mode and entry then
+    print(' ')
+    print("::Slurp Debug")
     print( entry )
+    print("------------------------------------------------------------")
   end
 end
 
-return SlurpQueue
+function Slurp:run()
+  self:pump()
+end
+
+return Slurp
