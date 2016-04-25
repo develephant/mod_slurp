@@ -103,11 +103,9 @@
         
             <li><a href="#slurpnew-init_tbl">Slurp:new( init_tbl )</a></li>
         
-            <li><a href="#slurpadd-url">slurp:add( url )</a></li>
-        
             <li><a href="#slurprun">slurp:run()</a></li>
         
-            <li><a href="#slurpstop">slurp:stop()</a></li>
+            <li><a href="#slurpcancel">slurp:cancel()</a></li>
         
             <li><a href="#slurpcount">slurp:count()</a></li>
         
@@ -149,15 +147,15 @@
 <tbody>
 <tr>
 <td><code>urls</code></td>
-<td>A table array of URL strings. You can also use the <code>:add()</code> method (see below)</td>
-<td>nil</td>
-<td>No</td>
-</tr>
-<tr>
-<td><code>callback</code></td>
-<td>The default method that will be called on network events</td>
+<td>A table array of URL strings to walk</td>
 <td>nil</td>
 <td>Yes</td>
+</tr>
+<tr>
+<td><code>method</code></td>
+<td>The default method that will be called on network events</td>
+<td>"GET"</td>
+<td>No</td>
 </tr>
 <tr>
 <td><code>timeout</code></td>
@@ -166,9 +164,27 @@
 <td>No</td>
 </tr>
 <tr>
-<td><code>breather</code></td>
-<td>Amount of time in milliseconds between network requests</td>
-<td>555</td>
+<td><code>onSuccess</code></td>
+<td>The callback method when content has been captured</td>
+<td>nil</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>onFailed</code></td>
+<td>The callback when a URL fails to connect</td>
+<td>nil</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>onError</code></td>
+<td>The callback when a network error occurs</td>
+<td>nil</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>onDone</code></td>
+<td>The callback for when the queue has been emptied</td>
+<td>nil</td>
 <td>No</td>
 </tr>
 <tr>
@@ -185,82 +201,165 @@
 </tr>
 </tbody>
 </table>
-<h4 id="example">Example</h4>
-<pre><code class="lua">--Require mod_slurp
-local Slurp = require('mod_slurp')
-
---Crate the URL table array
-local urls = { &quot;http://www.e4rrBorked.com&quot;, &quot;https://www.google.com&quot; }
-
---Create a networkCallback
-local function networkCallback( evt )
-  print( evt.response )
-end
-
---Create a new Slurp instance
-local s = Slurp:new({
-  urls = urls,
-  timeout = 10000,
-  debug = true,
-  callback = networkCallback,
-  options =
-  {
-    headers =
-    {
-      [&quot;X-Corona-App-ID&quot;] = '1234abcd'
-    }
-  }
-})
-</code></pre>
-
-<hr />
-<h2 id="slurpadd-url"><code>slurp:add( url )</code></h2>
-<p>Adds a URL to the Slurp queue.</p>
-<h4 id="parameters">Parameters</h4>
+<h4 id="callback-parameters">Callback Parameters</h4>
+<p><code>onSuccess( content, url, status )</code></p>
 <table>
 <thead>
 <tr>
 <th>Name</th>
 <th>Description</th>
-<th>Required</th>
+<th>Type</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>url</code></td>
-<td>A URL string to add to the process queue</td>
-<td>Yes</td>
+<td>content</td>
+<td>The content that was found</td>
+<td>String</td>
+</tr>
+<tr>
+<td>url</td>
+<td>The URL where is came from</td>
+<td>String</td>
+</tr>
+<tr>
+<td>status</td>
+<td>The HTTP status code returned</td>
+<td>Number</td>
 </tr>
 </tbody>
 </table>
-<h4 id="returns_1">Returns</h4>
-<p><strong>Nothing</strong></p>
-<h4 id="example_1">Example</h4>
-<pre><code class="lua">...
+<pre><code class="lua">local onSuccess = function( content, url, status )
+  print( content )
+end
+</code></pre>
 
-local s = Slurp:new( ... )
+<hr />
+<p><code>onFailed( url, status )</code></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>url</td>
+<td>The URL that failed</td>
+<td>String</td>
+</tr>
+<tr>
+<td>status</td>
+<td>The HTTP status code returned</td>
+<td>Number</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="lua">local onFailed = function( url, status )
+  print( status )
+end
+</code></pre>
 
---Adding URLs to the Queue
-s:add(&quot;https://coronalabs.com&quot;)
-s:add(&quot;https://www.google.com&quot;)
+<hr />
+<p><code>onError( url )</code></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>url</td>
+<td>The URL that threw the network error</td>
+<td>String</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="lua">local onError = function( url )
+  print( &quot;Error on &quot; .. url )
+end
+</code></pre>
+
+<hr />
+<p><code>onDone()</code></p>
+<p>Called when the Slurp process is finished, whether content was found or not.</p>
+<pre><code class="lua">local onDone = function()
+  print( &quot;Done&quot; )
+end
+</code></pre>
+
+<hr />
+<h4 id="example">Example</h4>
+<pre><code class="lua">--== Load Slurp Module
+local Slurp = require('mod_slurp')
+
+--== Gather URLs
+urls =
+{
+  'somemisplacedtext', --&lt; not a url, fail
+  'http://www.err4Borked.com', --&lt; doesnt exist, fail
+  'https://coronium.io', --&lt; no cert on https, fail
+  'http://www.coronium.io:9000', --&lt; timeout, fail
+  'https://www.google.com', --&lt; Success! (99.9% of the time)
+  'https://www.yahoo.com' --&lt; won't fire unless Google is down
+}
+
+--== Create Network Callbacks
+local onSuccess = function( content, url, status )
+  print(&quot;SUCCESS&quot;)
+  print( status )
+  print( url )
+  print( string.sub( content, 1, 500 ) ) --&lt; trim for demo
+end
+
+local onFailed = function( url, status )
+  print(&quot;FAILED&quot;)
+  print( status )
+  print( url )
+end
+
+local onError = function( url )
+  print(&quot;ERROR&quot;)
+  print( url )
+end
+
+local onDone = function()
+  print(&quot;ALL DONE&quot;)
+end
+
+--== Create a new Slurp instance
+local s = Slurp:new({
+  urls = urls, -- Table array of URLs
+  onSuccess = onSuccess, -- The callback on success
+  onFailed = onFailed, -- The callback when no valid data is found
+  onError = onError, -- A network error occurred
+  onDone = onDone, -- The queue has finished running
+  debug = true -- Show debug output in the console
+})
+
+--== Run the Slurp instance
+-- Results are returned in the
+-- network callback functions
+s:run()
 </code></pre>
 
 <hr />
 <h2 id="slurprun"><code>slurp:run()</code></h2>
 <p>Starts running the Slurp process, checking sites for connectivity and results. You can run this anytime after giving the queue at least one URL.</p>
-<h4 id="returns_2">Returns</h4>
-<p>Events through the <code>callback</code> method passed in when the instance was created (see <code>:new()</code> above).</p>
-<h4 id="parameters_1">Parameters</h4>
+<h4 id="returns_1">Returns</h4>
+<p>Events through the <code>callback</code> methods passed in when the instance was created (see <code>:new()</code> above).</p>
+<h4 id="parameters">Parameters</h4>
 <p><strong>None</strong></p>
-<h4 id="example_2">Example</h4>
+<h4 id="example_1">Example</h4>
 <pre><code class="lua">...
 
---Create the instance
+--Create and set up the instance
 local s = Slurp:new( ... )
-
---Add some URLs
-s:add(&quot;https://coronalabs.com&quot;)
-s:add(&quot;https://www.google.com&quot;)
 
 --Run the instance
 s:run()
@@ -268,27 +367,27 @@ s:run()
 </code></pre>
 
 <hr />
-<h2 id="slurpstop"><code>slurp:stop()</code></h2>
+<h2 id="slurpcancel"><code>slurp:cancel()</code></h2>
 <p>While Slurp generally handles its own life-cycle, in situations where you need a full-stop, you can use this method.</p>
-<h4 id="returns_3">Returns</h4>
+<h4 id="returns_2">Returns</h4>
 <p><strong>Nothing</strong></p>
-<h4 id="parameters_2">Parameters</h4>
+<h4 id="parameters_1">Parameters</h4>
 <p><strong>None</strong></p>
-<h4 id="example_3">Example</h4>
+<h4 id="example_2">Example</h4>
 <pre><code class="lua">...
 
 --Halt the Slurp instance from anymore processing.
-s:stop()
+s:cancel()
 </code></pre>
 
 <hr />
 <h2 id="slurpcount"><code>slurp:count()</code></h2>
 <p>The current amount of entries left in the Slurp queue.</p>
-<h4 id="returns_4">Returns</h4>
+<h4 id="returns_3">Returns</h4>
 <p>A Number</p>
-<h4 id="parameters_3">Parameters</h4>
+<h4 id="parameters_2">Parameters</h4>
 <p><strong>None</strong></p>
-<h4 id="example_4">Example</h4>
+<h4 id="example_3">Example</h4>
 <pre><code class="lua">...
 
 --Get the current queue count
@@ -297,9 +396,9 @@ local q_cnt = s:count()
 
 <hr />
 <h2 id="summary-notes">Summary Notes</h2>
-<p>Once you put together the URL queue, as in the example above, and set up the <code>callback</code>, we run the queue. By default, once the first successful result is found, Slurp stops processing that instance and triggers the supplied <code>callback</code>.</p>
+<p>Once you put together the URL queue, as in the example above, and set up the <code>callbacks</code>, we run the queue. By default, once the first successful result is found, Slurp stops processing that instance and triggers the supplied <code>onSuccess</code> callback, if any.</p>
 <p>Timeouts are not based on the normal network timeout, but an actual timer instance. This provides more flexibility in moving through your queue. For instance, instead of waiting N seconds for the network timeout, you can decide to move on to the next URL at any amount of time of your choosing. This can be adjusted when creating a new Slurp instance.</p>
-<p>If Slurp runs into network or http errors, it will skip to the next URL in the queue, if any. The <code>timeout</code> is disregarded in these cases, but the <code>breather</code> delay still takes place.</p>
+<p>If Slurp runs into network or http errors, it will skip to the next URL in the queue, if any. The <code>timeout</code> is disregarded in these cases.</p>
 <p><strong><a href="https://forums.coronalabs.com">Visit the Corona Labs forums with any questions.</a></strong></p>
 <hr /></div>
         </div>

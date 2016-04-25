@@ -2,7 +2,7 @@
     "docs": [
         {
             "location": "/", 
-            "text": "mod_slurp.lua\n\n\nThe Slurp Module for \nCorona SDK\n allows you to walk a list of URLs and get the first one with content. Skipping unresponsive endpoints, or network related site errors.\n\n\nPreflight\n\n\n\n\nDownload Slurp!\n\n\n\n\nAdd the Slurp Module \nmod_slurp.lua\n to your \nCorona SDK\n project.\n\n\nlocal Slurp = require('mod_slurp')\n\n\n\n\nUsage\n\n\nUsing Slurp is pretty simple; you provide the module with a list of URLs and it will go through each one until it receives valid data. This can be useful for checking busy or unresponsive network endpoints.\n\n\nThere are only a handful of Slurp API methods:\n\n\n\n\nSlurp:new( init_tbl )\n\n\nCreate a new Slurp instance.\n\n\nReturns\n\n\nA new Slurp instance.\n\n\nInit Table\n\n\n\n\n\n\n\n\nKey\n\n\nDescription\n\n\nDefault\n\n\nRequired\n\n\n\n\n\n\n\n\n\n\nurls\n\n\nA table array of URL strings. You can also use the \n:add()\n method (see below)\n\n\nnil\n\n\nNo\n\n\n\n\n\n\ncallback\n\n\nThe default method that will be called on network events\n\n\nnil\n\n\nYes\n\n\n\n\n\n\ntimeout\n\n\nAmount of time in milliseconds before moving to the next URL\n\n\n5000\n\n\nNo\n\n\n\n\n\n\nbreather\n\n\nAmount of time in milliseconds between network requests\n\n\n555\n\n\nNo\n\n\n\n\n\n\noptions\n\n\nA table of options that mimics the network.request options\n\n\nnil\n\n\nNo\n\n\n\n\n\n\ndebug\n\n\nShow process debugging output in the console\n\n\nfalse\n\n\nNo\n\n\n\n\n\n\n\n\nExample\n\n\n--Require mod_slurp\nlocal Slurp = require('mod_slurp')\n\n--Crate the URL table array\nlocal urls = { \nhttp://www.e4rrBorked.com\n, \nhttps://www.google.com\n }\n\n--Create a networkCallback\nlocal function networkCallback( evt )\n  print( evt.response )\nend\n\n--Create a new Slurp instance\nlocal s = Slurp:new({\n  urls = urls,\n  timeout = 10000,\n  debug = true,\n  callback = networkCallback,\n  options =\n  {\n    headers =\n    {\n      [\nX-Corona-App-ID\n] = '1234abcd'\n    }\n  }\n})\n\n\n\n\n\n\nslurp:add( url )\n\n\nAdds a URL to the Slurp queue.\n\n\nParameters\n\n\n\n\n\n\n\n\nName\n\n\nDescription\n\n\nRequired\n\n\n\n\n\n\n\n\n\n\nurl\n\n\nA URL string to add to the process queue\n\n\nYes\n\n\n\n\n\n\n\n\nReturns\n\n\nNothing\n\n\nExample\n\n\n...\n\nlocal s = Slurp:new( ... )\n\n--Adding URLs to the Queue\ns:add(\nhttps://coronalabs.com\n)\ns:add(\nhttps://www.google.com\n)\n\n\n\n\n\n\nslurp:run()\n\n\nStarts running the Slurp process, checking sites for connectivity and results. You can run this anytime after giving the queue at least one URL.\n\n\nReturns\n\n\nEvents through the \ncallback\n method passed in when the instance was created (see \n:new()\n above).\n\n\nParameters\n\n\nNone\n\n\nExample\n\n\n...\n\n--Create the instance\nlocal s = Slurp:new( ... )\n\n--Add some URLs\ns:add(\nhttps://coronalabs.com\n)\ns:add(\nhttps://www.google.com\n)\n\n--Run the instance\ns:run()\n\n\n\n\n\n\n\nslurp:stop()\n\n\nWhile Slurp generally handles its own life-cycle, in situations where you need a full-stop, you can use this method.\n\n\nReturns\n\n\nNothing\n\n\nParameters\n\n\nNone\n\n\nExample\n\n\n...\n\n--Halt the Slurp instance from anymore processing.\ns:stop()\n\n\n\n\n\n\nslurp:count()\n\n\nThe current amount of entries left in the Slurp queue.\n\n\nReturns\n\n\nA Number\n\n\nParameters\n\n\nNone\n\n\nExample\n\n\n...\n\n--Get the current queue count\nlocal q_cnt = s:count()\n\n\n\n\n\n\nSummary Notes\n\n\nOnce you put together the URL queue, as in the example above, and set up the \ncallback\n, we run the queue. By default, once the first successful result is found, Slurp stops processing that instance and triggers the supplied \ncallback\n.\n\n\nTimeouts are not based on the normal network timeout, but an actual timer instance. This provides more flexibility in moving through your queue. For instance, instead of waiting N seconds for the network timeout, you can decide to move on to the next URL at any amount of time of your choosing. This can be adjusted when creating a new Slurp instance.\n\n\nIf Slurp runs into network or http errors, it will skip to the next URL in the queue, if any. The \ntimeout\n is disregarded in these cases, but the \nbreather\n delay still takes place.\n\n\nVisit the Corona Labs forums with any questions.", 
+            "text": "mod_slurp.lua\n\n\nThe Slurp Module for \nCorona SDK\n allows you to walk a list of URLs and get the first one with content. Skipping unresponsive endpoints, or network related site errors.\n\n\nPreflight\n\n\n\n\nDownload Slurp!\n\n\n\n\nAdd the Slurp Module \nmod_slurp.lua\n to your \nCorona SDK\n project.\n\n\nlocal Slurp = require('mod_slurp')\n\n\n\n\nUsage\n\n\nUsing Slurp is pretty simple; you provide the module with a list of URLs and it will go through each one until it receives valid data. This can be useful for checking busy or unresponsive network endpoints.\n\n\nThere are only a handful of Slurp API methods:\n\n\n\n\nSlurp:new( init_tbl )\n\n\nCreate a new Slurp instance.\n\n\nReturns\n\n\nA new Slurp instance.\n\n\nInit Table\n\n\n\n\n\n\n\n\nKey\n\n\nDescription\n\n\nDefault\n\n\nRequired\n\n\n\n\n\n\n\n\n\n\nurls\n\n\nA table array of URL strings to walk\n\n\nnil\n\n\nYes\n\n\n\n\n\n\nmethod\n\n\nThe default method that will be called on network events\n\n\n\"GET\"\n\n\nNo\n\n\n\n\n\n\ntimeout\n\n\nAmount of time in milliseconds before moving to the next URL\n\n\n5000\n\n\nNo\n\n\n\n\n\n\nonSuccess\n\n\nThe callback method when content has been captured\n\n\nnil\n\n\nNo\n\n\n\n\n\n\nonFailed\n\n\nThe callback when a URL fails to connect\n\n\nnil\n\n\nNo\n\n\n\n\n\n\nonError\n\n\nThe callback when a network error occurs\n\n\nnil\n\n\nNo\n\n\n\n\n\n\nonDone\n\n\nThe callback for when the queue has been emptied\n\n\nnil\n\n\nNo\n\n\n\n\n\n\noptions\n\n\nA table of options that mimics the network.request options\n\n\nnil\n\n\nNo\n\n\n\n\n\n\ndebug\n\n\nShow process debugging output in the console\n\n\nfalse\n\n\nNo\n\n\n\n\n\n\n\n\nCallback Parameters\n\n\nonSuccess( content, url, status )\n\n\n\n\n\n\n\n\nName\n\n\nDescription\n\n\nType\n\n\n\n\n\n\n\n\n\n\ncontent\n\n\nThe content that was found\n\n\nString\n\n\n\n\n\n\nurl\n\n\nThe URL where is came from\n\n\nString\n\n\n\n\n\n\nstatus\n\n\nThe HTTP status code returned\n\n\nNumber\n\n\n\n\n\n\n\n\nlocal onSuccess = function( content, url, status )\n  print( content )\nend\n\n\n\n\n\n\nonFailed( url, status )\n\n\n\n\n\n\n\n\nName\n\n\nDescription\n\n\nType\n\n\n\n\n\n\n\n\n\n\nurl\n\n\nThe URL that failed\n\n\nString\n\n\n\n\n\n\nstatus\n\n\nThe HTTP status code returned\n\n\nNumber\n\n\n\n\n\n\n\n\nlocal onFailed = function( url, status )\n  print( status )\nend\n\n\n\n\n\n\nonError( url )\n\n\n\n\n\n\n\n\nName\n\n\nDescription\n\n\nType\n\n\n\n\n\n\n\n\n\n\nurl\n\n\nThe URL that threw the network error\n\n\nString\n\n\n\n\n\n\n\n\nlocal onError = function( url )\n  print( \nError on \n .. url )\nend\n\n\n\n\n\n\nonDone()\n\n\nCalled when the Slurp process is finished, whether content was found or not.\n\n\nlocal onDone = function()\n  print( \nDone\n )\nend\n\n\n\n\n\n\nExample\n\n\n--== Load Slurp Module\nlocal Slurp = require('mod_slurp')\n\n--== Gather URLs\nurls =\n{\n  'somemisplacedtext', --\n not a url, fail\n  'http://www.err4Borked.com', --\n doesnt exist, fail\n  'https://coronium.io', --\n no cert on https, fail\n  'http://www.coronium.io:9000', --\n timeout, fail\n  'https://www.google.com', --\n Success! (99.9% of the time)\n  'https://www.yahoo.com' --\n won't fire unless Google is down\n}\n\n--== Create Network Callbacks\nlocal onSuccess = function( content, url, status )\n  print(\nSUCCESS\n)\n  print( status )\n  print( url )\n  print( string.sub( content, 1, 500 ) ) --\n trim for demo\nend\n\nlocal onFailed = function( url, status )\n  print(\nFAILED\n)\n  print( status )\n  print( url )\nend\n\nlocal onError = function( url )\n  print(\nERROR\n)\n  print( url )\nend\n\nlocal onDone = function()\n  print(\nALL DONE\n)\nend\n\n--== Create a new Slurp instance\nlocal s = Slurp:new({\n  urls = urls, -- Table array of URLs\n  onSuccess = onSuccess, -- The callback on success\n  onFailed = onFailed, -- The callback when no valid data is found\n  onError = onError, -- A network error occurred\n  onDone = onDone, -- The queue has finished running\n  debug = true -- Show debug output in the console\n})\n\n--== Run the Slurp instance\n-- Results are returned in the\n-- network callback functions\ns:run()\n\n\n\n\n\n\nslurp:run()\n\n\nStarts running the Slurp process, checking sites for connectivity and results. You can run this anytime after giving the queue at least one URL.\n\n\nReturns\n\n\nEvents through the \ncallback\n methods passed in when the instance was created (see \n:new()\n above).\n\n\nParameters\n\n\nNone\n\n\nExample\n\n\n...\n\n--Create and set up the instance\nlocal s = Slurp:new( ... )\n\n--Run the instance\ns:run()\n\n\n\n\n\n\n\nslurp:cancel()\n\n\nWhile Slurp generally handles its own life-cycle, in situations where you need a full-stop, you can use this method.\n\n\nReturns\n\n\nNothing\n\n\nParameters\n\n\nNone\n\n\nExample\n\n\n...\n\n--Halt the Slurp instance from anymore processing.\ns:cancel()\n\n\n\n\n\n\nslurp:count()\n\n\nThe current amount of entries left in the Slurp queue.\n\n\nReturns\n\n\nA Number\n\n\nParameters\n\n\nNone\n\n\nExample\n\n\n...\n\n--Get the current queue count\nlocal q_cnt = s:count()\n\n\n\n\n\n\nSummary Notes\n\n\nOnce you put together the URL queue, as in the example above, and set up the \ncallbacks\n, we run the queue. By default, once the first successful result is found, Slurp stops processing that instance and triggers the supplied \nonSuccess\n callback, if any.\n\n\nTimeouts are not based on the normal network timeout, but an actual timer instance. This provides more flexibility in moving through your queue. For instance, instead of waiting N seconds for the network timeout, you can decide to move on to the next URL at any amount of time of your choosing. This can be adjusted when creating a new Slurp instance.\n\n\nIf Slurp runs into network or http errors, it will skip to the next URL in the queue, if any. The \ntimeout\n is disregarded in these cases.\n\n\nVisit the Corona Labs forums with any questions.", 
             "title": "Documentation"
         }, 
         {
@@ -37,32 +37,17 @@
         }, 
         {
             "location": "/#init-table", 
-            "text": "Key  Description  Default  Required      urls  A table array of URL strings. You can also use the  :add()  method (see below)  nil  No    callback  The default method that will be called on network events  nil  Yes    timeout  Amount of time in milliseconds before moving to the next URL  5000  No    breather  Amount of time in milliseconds between network requests  555  No    options  A table of options that mimics the network.request options  nil  No    debug  Show process debugging output in the console  false  No", 
+            "text": "Key  Description  Default  Required      urls  A table array of URL strings to walk  nil  Yes    method  The default method that will be called on network events  \"GET\"  No    timeout  Amount of time in milliseconds before moving to the next URL  5000  No    onSuccess  The callback method when content has been captured  nil  No    onFailed  The callback when a URL fails to connect  nil  No    onError  The callback when a network error occurs  nil  No    onDone  The callback for when the queue has been emptied  nil  No    options  A table of options that mimics the network.request options  nil  No    debug  Show process debugging output in the console  false  No", 
             "title": "Init Table"
         }, 
         {
+            "location": "/#callback-parameters", 
+            "text": "onSuccess( content, url, status )     Name  Description  Type      content  The content that was found  String    url  The URL where is came from  String    status  The HTTP status code returned  Number     local onSuccess = function( content, url, status )\n  print( content )\nend   onFailed( url, status )     Name  Description  Type      url  The URL that failed  String    status  The HTTP status code returned  Number     local onFailed = function( url, status )\n  print( status )\nend   onError( url )     Name  Description  Type      url  The URL that threw the network error  String     local onError = function( url )\n  print(  Error on   .. url )\nend   onDone()  Called when the Slurp process is finished, whether content was found or not.  local onDone = function()\n  print(  Done  )\nend", 
+            "title": "Callback Parameters"
+        }, 
+        {
             "location": "/#example", 
-            "text": "--Require mod_slurp\nlocal Slurp = require('mod_slurp')\n\n--Crate the URL table array\nlocal urls = {  http://www.e4rrBorked.com ,  https://www.google.com  }\n\n--Create a networkCallback\nlocal function networkCallback( evt )\n  print( evt.response )\nend\n\n--Create a new Slurp instance\nlocal s = Slurp:new({\n  urls = urls,\n  timeout = 10000,\n  debug = true,\n  callback = networkCallback,\n  options =\n  {\n    headers =\n    {\n      [ X-Corona-App-ID ] = '1234abcd'\n    }\n  }\n})", 
-            "title": "Example"
-        }, 
-        {
-            "location": "/#slurpadd-url", 
-            "text": "Adds a URL to the Slurp queue.", 
-            "title": "slurp:add( url )"
-        }, 
-        {
-            "location": "/#parameters", 
-            "text": "Name  Description  Required      url  A URL string to add to the process queue  Yes", 
-            "title": "Parameters"
-        }, 
-        {
-            "location": "/#returns_1", 
-            "text": "Nothing", 
-            "title": "Returns"
-        }, 
-        {
-            "location": "/#example_1", 
-            "text": "...\n\nlocal s = Slurp:new( ... )\n\n--Adding URLs to the Queue\ns:add( https://coronalabs.com )\ns:add( https://www.google.com )", 
+            "text": "--== Load Slurp Module\nlocal Slurp = require('mod_slurp')\n\n--== Gather URLs\nurls =\n{\n  'somemisplacedtext', --  not a url, fail\n  'http://www.err4Borked.com', --  doesnt exist, fail\n  'https://coronium.io', --  no cert on https, fail\n  'http://www.coronium.io:9000', --  timeout, fail\n  'https://www.google.com', --  Success! (99.9% of the time)\n  'https://www.yahoo.com' --  won't fire unless Google is down\n}\n\n--== Create Network Callbacks\nlocal onSuccess = function( content, url, status )\n  print( SUCCESS )\n  print( status )\n  print( url )\n  print( string.sub( content, 1, 500 ) ) --  trim for demo\nend\n\nlocal onFailed = function( url, status )\n  print( FAILED )\n  print( status )\n  print( url )\nend\n\nlocal onError = function( url )\n  print( ERROR )\n  print( url )\nend\n\nlocal onDone = function()\n  print( ALL DONE )\nend\n\n--== Create a new Slurp instance\nlocal s = Slurp:new({\n  urls = urls, -- Table array of URLs\n  onSuccess = onSuccess, -- The callback on success\n  onFailed = onFailed, -- The callback when no valid data is found\n  onError = onError, -- A network error occurred\n  onDone = onDone, -- The queue has finished running\n  debug = true -- Show debug output in the console\n})\n\n--== Run the Slurp instance\n-- Results are returned in the\n-- network callback functions\ns:run()", 
             "title": "Example"
         }, 
         {
@@ -71,8 +56,28 @@
             "title": "slurp:run()"
         }, 
         {
+            "location": "/#returns_1", 
+            "text": "Events through the  callback  methods passed in when the instance was created (see  :new()  above).", 
+            "title": "Returns"
+        }, 
+        {
+            "location": "/#parameters", 
+            "text": "None", 
+            "title": "Parameters"
+        }, 
+        {
+            "location": "/#example_1", 
+            "text": "...\n\n--Create and set up the instance\nlocal s = Slurp:new( ... )\n\n--Run the instance\ns:run()", 
+            "title": "Example"
+        }, 
+        {
+            "location": "/#slurpcancel", 
+            "text": "While Slurp generally handles its own life-cycle, in situations where you need a full-stop, you can use this method.", 
+            "title": "slurp:cancel()"
+        }, 
+        {
             "location": "/#returns_2", 
-            "text": "Events through the  callback  method passed in when the instance was created (see  :new()  above).", 
+            "text": "Nothing", 
             "title": "Returns"
         }, 
         {
@@ -82,17 +87,17 @@
         }, 
         {
             "location": "/#example_2", 
-            "text": "...\n\n--Create the instance\nlocal s = Slurp:new( ... )\n\n--Add some URLs\ns:add( https://coronalabs.com )\ns:add( https://www.google.com )\n\n--Run the instance\ns:run()", 
+            "text": "...\n\n--Halt the Slurp instance from anymore processing.\ns:cancel()", 
             "title": "Example"
         }, 
         {
-            "location": "/#slurpstop", 
-            "text": "While Slurp generally handles its own life-cycle, in situations where you need a full-stop, you can use this method.", 
-            "title": "slurp:stop()"
+            "location": "/#slurpcount", 
+            "text": "The current amount of entries left in the Slurp queue.", 
+            "title": "slurp:count()"
         }, 
         {
             "location": "/#returns_3", 
-            "text": "Nothing", 
+            "text": "A Number", 
             "title": "Returns"
         }, 
         {
@@ -102,32 +107,12 @@
         }, 
         {
             "location": "/#example_3", 
-            "text": "...\n\n--Halt the Slurp instance from anymore processing.\ns:stop()", 
-            "title": "Example"
-        }, 
-        {
-            "location": "/#slurpcount", 
-            "text": "The current amount of entries left in the Slurp queue.", 
-            "title": "slurp:count()"
-        }, 
-        {
-            "location": "/#returns_4", 
-            "text": "A Number", 
-            "title": "Returns"
-        }, 
-        {
-            "location": "/#parameters_3", 
-            "text": "None", 
-            "title": "Parameters"
-        }, 
-        {
-            "location": "/#example_4", 
             "text": "...\n\n--Get the current queue count\nlocal q_cnt = s:count()", 
             "title": "Example"
         }, 
         {
             "location": "/#summary-notes", 
-            "text": "Once you put together the URL queue, as in the example above, and set up the  callback , we run the queue. By default, once the first successful result is found, Slurp stops processing that instance and triggers the supplied  callback .  Timeouts are not based on the normal network timeout, but an actual timer instance. This provides more flexibility in moving through your queue. For instance, instead of waiting N seconds for the network timeout, you can decide to move on to the next URL at any amount of time of your choosing. This can be adjusted when creating a new Slurp instance.  If Slurp runs into network or http errors, it will skip to the next URL in the queue, if any. The  timeout  is disregarded in these cases, but the  breather  delay still takes place.  Visit the Corona Labs forums with any questions.", 
+            "text": "Once you put together the URL queue, as in the example above, and set up the  callbacks , we run the queue. By default, once the first successful result is found, Slurp stops processing that instance and triggers the supplied  onSuccess  callback, if any.  Timeouts are not based on the normal network timeout, but an actual timer instance. This provides more flexibility in moving through your queue. For instance, instead of waiting N seconds for the network timeout, you can decide to move on to the next URL at any amount of time of your choosing. This can be adjusted when creating a new Slurp instance.  If Slurp runs into network or http errors, it will skip to the next URL in the queue, if any. The  timeout  is disregarded in these cases.  Visit the Corona Labs forums with any questions.", 
             "title": "Summary Notes"
         }
     ]
